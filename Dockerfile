@@ -35,6 +35,19 @@ COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
 
 RUN chown -R shiny:shiny /srv/shiny-server
 
+# Simulate Shiny Server sourcing app.R (errors in top-level code will fail build)
+RUN Rscript -e "\
+  options(warn=2); \
+  tryCatch({ \
+    source('/srv/shiny-server/app.R', local=TRUE); \
+    cat('=== APP SOURCED SUCCESSFULLY ===\n'); \
+    obj <- try(shinyApp(ui, server)); \
+    cat('shinyApp class:', paste(class(obj), collapse=', '), '\n'); \
+  }, error = function(e) { \
+    cat('!!! SOURCE ERROR:', conditionMessage(e), '\n'); \
+    q(status=1, save='no'); \
+  })"
+
 # Verify data files load correctly
 RUN Rscript -e "\
   data_dir <- '/srv/shiny-server/data'; \
