@@ -13,7 +13,8 @@ COPY install_packages.R /tmp/install_packages.R
 RUN Rscript /tmp/install_packages.R
 
 COPY dashboard_app /srv/shiny-server
+COPY run.R /srv/shiny-server/run.R
 
 EXPOSE 7860
 
-CMD ["R", "-e", "shiny::runApp('/srv/shiny-server', host='0.0.0.0', port=7860)"]
+CMD ["Rscript", "/srv/shiny-server/run.R"]
