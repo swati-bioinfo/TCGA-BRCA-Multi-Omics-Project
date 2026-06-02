@@ -7,11 +7,13 @@ RUN apt-get update && apt-get install -y \
     libfontconfig1-dev \
     libcairo2-dev \
     libxt-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY dashboard_app /srv/shiny-server
 
-RUN Rscript /srv/shiny-server/packages.R
+RUN Rscript -e "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/jammy/latest'), install.packages.check.source = 'no'); source('/srv/shiny-server/packages.R')"
 
 EXPOSE 7860
 
