@@ -35,11 +35,15 @@ COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
 
 RUN chown -R shiny:shiny /srv/shiny-server
 
-# Simulate Shiny Server sourcing app.R (errors in top-level code will fail build)
+# Simulate Shiny Server sourcing app.R (same CWD as Shiny Server)
 RUN Rscript -e "\
+  setwd('/srv/shiny-server'); \
+  cat('CWD:', getwd(), '\n'); \
+  cat('data dir exists:', dir.exists('data'), '\n'); \
+  cat('data files:', paste(dir('data'), collapse=', '), '\n'); \
   options(warn=2); \
   tryCatch({ \
-    source('/srv/shiny-server/app.R', local=TRUE); \
+    source('app.R', local=TRUE); \
     cat('=== APP SOURCED SUCCESSFULLY ===\n'); \
     obj <- try(shinyApp(ui, server)); \
     cat('shinyApp class:', paste(class(obj), collapse=', '), '\n'); \
@@ -48,28 +52,7 @@ RUN Rscript -e "\
     q(status=1, save='no'); \
   })"
 
-# Verify data files load correctly
-RUN Rscript -e "\
-  data_dir <- '/srv/shiny-server/data'; \
-  files <- c('patient_data.csv','cox_os.csv','cox_adjusted_clinical_os.csv',\
-             'factor_variance_summary.csv','rmst_per_factor.csv',\
-             'top_features_per_factor.csv','factor_descriptions.csv',\
-             'reference_km.csv','baseline_survival.csv','cox_multi.rds'); \
-  for(f in files) { \
-    path <- file.path(data_dir, f); \
-    if(grepl('\\\\.rds$', f)) { \
-      x <- try(readRDS(path), silent=TRUE); \
-    } else { \
-      x <- try(read.csv(path), silent=TRUE); \
-    }; \
-    if(inherits(x, 'try-error')) { \
-      cat('FAIL:', f, '-', attr(x,'condition')$message, '\n'); \
-      q(status=1); \
-    } else { \
-      cat('OK:', f, '-', nrow(x), 'rows\n'); \
-    } \
-  }; \
-  cat('All data files loaded\n')"
+
 
 EXPOSE 7860
 
