@@ -21,12 +21,7 @@ RUN install2.r --error --skipinstalled \
     umap
 
 # Install Bioc packages
-RUN Rscript -e "
-    if (!requireNamespace('BiocManager', quietly=TRUE))
-        install.packages('BiocManager', repos='https://cloud.r-project.org');
-    if (!requireNamespace('MultiAssayExperiment', quietly=TRUE))
-        BiocManager::install('MultiAssayExperiment', update=FALSE, ask=FALSE)
-"
+RUN Rscript -e "install.packages('BiocManager',repos='https://cloud.r-project.org');BiocManager::install('MultiAssayExperiment',update=FALSE,ask=FALSE)"
 
 COPY dashboard_app /srv/shiny-server
 COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
