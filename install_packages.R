@@ -3,7 +3,7 @@ options(
   install.packages.check.source = "no"
 )
 
-pkgs <- c("bs4Dash", "shinyjs", "plotly", "DT", "survminer", "umap")
+pkgs <- c("shiny", "bs4Dash", "shinyjs", "plotly", "DT", "survminer", "dplyr", "ggplot2", "umap")
 for (pkg in pkgs) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
     install.packages(pkg, dependencies = TRUE)
